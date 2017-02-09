@@ -11,6 +11,10 @@ var fs = require('fs');
 var port = 5000;
 var stylesheet = fs.readFileSync('gallery.css')
 var imageNames = ['ace.jpg', 'bubble.jpg', 'chess.jpg', 'fern.jpg', 'mobile.jpg']
+// var config = 
+// {
+	// title: "Gallery"
+// }
 var config = JSON.parse(fs.readFileSync('config.json'));
 var url = require('url');
 
