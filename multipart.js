@@ -7,6 +7,7 @@ a module for processing mulitpart http requests
 
 module.exports = multipart;
 
+const CRLF = Buffer.from([0x0D, 0x0A]);
 const DOUBLE_CRLF = Buffer.from([0x0D, 0x0A, 0x0D, 0x0A]);
 
 
@@ -21,7 +22,7 @@ next with the request and response.
 */
 function multipart(req, res, next)
 {
-	var chunks = []'
+	var chunks = [];
 	req.on('error', function()
 	{
 		console.error(err);
@@ -41,6 +42,17 @@ function multipart(req, res, next)
 		var buffer = Buffer.concat(chunks);
 		processBody(buffer, boundary)
 		next(req, res);
+		if(match && match[1])
+		{
+			processBody(body, match[1]);
+		}
+		else
+		{
+			console.error("No multipart boudnary defined.");
+			req.statusCode = 400;
+			req.statusMessage = "Malformed multipart request";
+			res.end();
+		}
 	});
 }
 
@@ -79,7 +91,7 @@ function processBody(buffer, boundary)
 			parseContents[tuple[0]] = tuple[1];
 		});
 	});
-	'return parsedContents;
+	return parsedContents;
 }
 
 /**
@@ -92,10 +104,20 @@ function parseContent(content, callback)
 {
 	var index = content.indexOf(DOUBLE_CRLF);
 	var head = content.slice(0, index).toString();
-	var body = dontent.slice(indext + 4);
+	var body = dontent.slice(indext + 4, buffer.length - index - 4);
+	
 	var name = /name="([\w\d\-_]+)"/.exec(head);
 	var filename = /filename="([\w\d\-_\.]+)"/.exec(head);
 	var contentType = /Content-Type: ([\w\d\/]+)/.exec(head);
+	
+	var headers = {};
+	head.split(CRLF).forEach(function(line)
+	{
+		var parts = line.split (': ');
+		var key = parts[0].toLowerCase();
+		var value = parts[1];
+		headers[key] = value
+	});
 	
 	if(!name) return callback("Content without name");
 	

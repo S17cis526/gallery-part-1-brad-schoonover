@@ -8,6 +8,7 @@
  
 var http = require("http");
 var fs = require('fs');
+var multipart = require("./multipart.js");
 var port = 5000;
 var stylesheet = fs.readFileSync('gallery.css')
 var imageNames = ['ace.jpg', 'bubble.jpg', 'chess.jpg', 'fern.jpg', 'mobile.jpg']
@@ -106,30 +107,53 @@ function serveImage(filename, req, res)
 
 function uploadImage(req, res)
 {
-	var body = '';
-	req.on('error', function()
+	multipart(req, res, function(req, res)
 	{
-		res.statusCode = 500;
-		res.end();
-	});
-	req.on('data', function(data)
-	{
-		body += data
-	});
-	req.on('end', function()
-	{
-		fs.writeFile('filename', body, function(err)
+		if(!req.body.image.filename)
+		{
+			console.error("No file in upload");
+			res.statusCode = 400;
+			res.statusMessage = "No file specified";
+			res.end("No file specified");
+			return;
+		}
+		fs.writeFile('images/' + req.body.image.filename, req.body.image.data, function(err)
 		{
 			if(err)
 			{
 				console.error(err);
 				res.statusCode = 500;
-				res.end();
+				res.statusMessage = "Server Error";
+				res.end("Server Error");
 				return;
 			}
 			serveGallery(req, res);
 		});
 	});
+	// var body = '';
+	// req.on('error', function()
+	// {
+		// res.statusCode = 500;
+		// res.end();
+	// });
+	// req.on('data', function(data)
+	// {
+		// body += data
+	// });
+	// req.on('end', function()
+	// {
+		// fs.writeFile('filename', body, function(err)
+		// {
+			// if(err)
+			// {
+				// console.error(err);
+				// res.statusCode = 500;
+				// res.end();
+				// return;
+			// }
+			// serveGallery(req, res);
+		// });
+	// });
 }
 
 var server = http.createServer(function(req, res) 
