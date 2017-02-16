@@ -5,14 +5,15 @@
  * This file defines the server for a
  * simple photo gallery web app.
  */
- 
+
 var http = require("http");
 var fs = require('fs');
-var multipart = require("./multipart.js");
+var multipart = require("./multipart");
+var template = require('./template');
 var port = 5000;
 var stylesheet = fs.readFileSync('gallery.css')
 var imageNames = ['ace.jpg', 'bubble.jpg', 'chess.jpg', 'fern.jpg', 'mobile.jpg']
-// var config = 
+// var config =
 // {
 	// title: "Gallery"
 // }
@@ -26,7 +27,7 @@ var chess = fs.readFileSync('images/chess.jpg');
 var fern = fs.readFileSynce('images/fern.jpg')
 */
 
-function getImageNames(callback) 
+function getImageNames(callback)
 {
 	fs.readdir('images/', function(err, fileNames)
 	{
@@ -34,11 +35,11 @@ function getImageNames(callback)
 		{
 			callback(err, undefined);
 		}
-		else 
+		else
 		{
 			callback(false, fileNames);
 		}
-		
+
 	});
 }
 
@@ -50,25 +51,12 @@ function imageNamesToTags(fileNames){
 
 function buildGalley(imageTags)
 {
-	var html = "<!doctype html><head>";
-	html += "<head>";
-	html +=  "<title> " + config.title + "</title>"
-	html +=  '<link href="gallery.css" rel="stylesheet" type="text/css">'
-	html += "</head>";
-	html += "<body>";
-	html += " <h1>" + config.title + "</h1>";
-	html += " <form>";
-	html += '  <input type = "text" name = "title">';
-	html += '  <input type = "submit" value = "Change Gallery title">'
-	html += '</form action = "">'
-	html += " <h2> Hello. </h2> Time is " + Date.now();
-	html += " <p> " + imageNamesToTags(imageTags).join('') + " <p> ";
-	html += '<form action= "" mthod = "POST" enctpye = "multipart/form-data">'
-	html += ' <input type = "file" name = "image">';
-	html += ' <input type = "submit" value = "Upload Image">';
-	html += '<form>';
-	html += "</body>";
-	return html;
+  return template.render('gallery',
+  {
+    title: config.title,
+    imageTags: imageNamesToTags(imageTags).join('')
+  });
+
 }
 
 function serveGalley(req, res)
@@ -82,7 +70,7 @@ function serveGalley(req, res)
 			res.statusMessage = 'Server error'
 			res.end();
 			return ;
-		}		
+		}
 		res.setHeader('content-Type', 'text/html');
 		res.end(buildGalley(imageNames));
 	});
@@ -102,7 +90,7 @@ function serveImage(filename, req, res)
 			}
 			res.setHeader("Content-Type", "image/jpeg");
 			res.end(body);
-		});	
+		});
 };
 
 function uploadImage(req, res)
@@ -156,14 +144,14 @@ function uploadImage(req, res)
 	// });
 }
 
-var server = http.createServer(function(req, res) 
+var server = http.createServer(function(req, res)
 {
 	var urlParts = url.parse(req.url);
-	
+
 	// var url = req.url.split('?');
 	// var resource = url[0];
 	// var queryString = url[1];
-	
+
 	if(urlParts.query)
 	{
 		var matches = /title=(.+)($|&)/.exec(urlParts.query);
@@ -173,7 +161,7 @@ var server = http.createServer(function(req, res)
 			fs.writeFile('config.json',JSON.stringify(config));
 		}
 	}
-	
+
 	switch(urlParts.pathname)
 	{
 		case '/':
@@ -194,12 +182,11 @@ var server = http.createServer(function(req, res)
 		default:
 			serveImage(req.url, req, res)
 			break;
-	}		
-	
+	}
+
 });
 
 server.listen(port, function()
 {
 	console.log("Listening on port " + port);
 });
-
