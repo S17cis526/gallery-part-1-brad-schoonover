@@ -20,6 +20,8 @@ var imageNames = ['ace.jpg', 'bubble.jpg', 'chess.jpg', 'fern.jpg', 'mobile.jpg'
 var config = JSON.parse(fs.readFileSync('config.json'));
 var url = require('url');
 
+template.loadDir('templates');
+
 /*
 use to start the server when having small files not thousands of fileSize
 
@@ -51,7 +53,7 @@ function imageNamesToTags(fileNames){
 
 function buildGalley(imageTags)
 {
-  return template.render('gallery',
+  return template.render('gallery.html',
   {
     title: config.title,
     imageTags: imageNamesToTags(imageTags).join('')
