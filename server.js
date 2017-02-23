@@ -11,8 +11,9 @@ var fs = require('fs');
 var multipart = require("./multipart");
 var template = require('./template');
 var port = 5000;
-var stylesheet = fs.readFileSync('gallery.css')
-var imageNames = ['ace.jpg', 'bubble.jpg', 'chess.jpg', 'fern.jpg', 'mobile.jpg']
+var stylesheet = fs.readFileSync('public/gallery.css');
+var script = fs.readFileSync('public/gallery.js');
+//var imageNames = ['ace.jpg', 'bubble.jpg', 'chess.jpg', 'fern.jpg', 'mobile.jpg']
 // var config =
 // {
 	// title: "Gallery"
@@ -180,6 +181,10 @@ var server = http.createServer(function(req, res)
 		case "/gallery.css":
 			res.setHeader('Content-Type', 'text/css');
 			res.end(stylesheet);
+			break;
+		case '/gallery.js':
+		  res.setHeader('Content-Type', 'text/javascript');
+			res.end(script);
 			break;
 		default:
 			serveImage(req.url, req, res)
