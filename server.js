@@ -10,9 +10,14 @@ var http = require("http");
 var fs = require('fs');
 var multipart = require("./multipart");
 var template = require('./template');
+var staticFile = require('./static');
 var port = 5000;
 var stylesheet = fs.readFileSync('public/gallery.css');
 var script = fs.readFileSync('public/gallery.js');
+
+/*load static*/
+staticFile.loadDir('public');
+
 //var imageNames = ['ace.jpg', 'bubble.jpg', 'chess.jpg', 'fern.jpg', 'mobile.jpg']
 // var config =
 // {
@@ -187,6 +192,10 @@ var server = http.createServer(function(req, res)
 			res.end(script);
 			break;
 		default:
+		  if(staticFile.isCached('public' + req.url))
+			{
+				staticFile.serveFile('public' + req.url, req, res);
+			}
 			serveImage(req.url, req, res)
 			break;
 	}
